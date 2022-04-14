@@ -910,12 +910,12 @@ export class Router extends Resolver {
   }
 
   __onNavigationEvent(event) {
-    const {pathname, search, hash} = event ? event.detail : window.location;
+    const {pathname, search, hash, updateHistory} = event ? event.detail : window.location;
     if (isString(this.__normalizePathname(pathname))) {
       if (event && event.preventDefault) {
         event.preventDefault();
       }
-      this.render({pathname, search, hash}, true);
+      this.render({pathname, search, hash}, true, updateHistory);
     }
   }
 
