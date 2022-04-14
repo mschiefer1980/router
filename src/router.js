@@ -423,6 +423,8 @@ export class Router extends Resolver {
    *    to pass to the resolver.
    * @param {boolean=} shouldUpdateHistory
    *    update browser history with the rendered location
+   * @param {boolean=} updateHistory
+   *    update browser history with the rendered location
    * @return {!Promise<!Node>}
    */
   render(pathnameOrContext, shouldUpdateHistory, updateHistory) {
