@@ -221,6 +221,8 @@ export class Router extends Resolver {
     // Using WeakMap instead of WeakSet because WeakSet is not supported by IE11
     this.__createdByRouter = new WeakMap();
     this.__addedByRouter = new WeakMap();
+    
+    this.updateHistory = true;
   }
 
   __resolveRoute(context) {
@@ -397,6 +399,10 @@ export class Router extends Resolver {
     }
     return this.ready;
   }
+  
+  setUpdateHistory(updateHistory){
+    this.updateHistory = updateHistory;
+  }
 
   /**
    * Asynchronously resolves the given pathname and renders the resolved route
@@ -419,7 +425,8 @@ export class Router extends Resolver {
    *    update browser history with the rendered location
    * @return {!Promise<!Node>}
    */
-  render(pathnameOrContext, shouldUpdateHistory) {
+  render(pathnameOrContext, shouldUpdateHistory, updateHistory) {
+    this.updateHistory = updateHistory;
     const renderId = ++this.__lastStartedRenderId;
     const context = Object.assign(
       {
@@ -731,13 +738,15 @@ export class Router extends Resolver {
   }
 
   __updateBrowserHistory({pathname, search = '', hash = ''}, replace) {
-    if (window.location.pathname !== pathname
-        || window.location.search !== search
-        || window.location.hash !== hash
-    ) {
-      const changeState = replace ? 'replaceState' : 'pushState';
-      window.history[changeState](null, document.title, pathname + search + hash);
-      window.dispatchEvent(new PopStateEvent('popstate', {state: 'vaadin-router-ignore'}));
+    if (this.updateHistory){
+      if (window.location.pathname !== pathname
+          || window.location.search !== search
+          || window.location.hash !== hash
+      ) {
+        const changeState = replace ? 'replaceState' : 'pushState';
+        window.history[changeState](null, document.title, pathname + search + hash);
+        window.dispatchEvent(new PopStateEvent('popstate', {state: 'vaadin-router-ignore'}));
+      }
     }
   }
 
@@ -988,11 +997,11 @@ export class Router extends Resolver {
    *   string property, and optional `search` and `hash` string properties.
    * @return {boolean}
    */
-  static go(path) {
+  static go(path, updateHistory = false) {
     const {pathname, search, hash} = isString(path)
       ? this.__createUrl(path, 'http://a') // some base to omit origin
       : path;
-    return fireRouterEvent('go', {pathname, search, hash});
+    return fireRouterEvent('go', {pathname, search, hash, updateHistory});
   }
 
   static __removeDomNodes(nodes) {
